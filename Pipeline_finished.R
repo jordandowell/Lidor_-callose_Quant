@@ -26,7 +26,7 @@ ALL_LabeledDots<-data.frame()
 
 #iterate over files
 for (i in 1:length(InputImage)) {
-  print(paste(InputImage[1], "is starting"))
+  print(paste(InputImage[i], "is starting"))
   
 
 
