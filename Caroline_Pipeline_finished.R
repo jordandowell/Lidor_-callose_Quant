@@ -8,7 +8,7 @@ BiocManager::install("digest")
 
 BiocManager::install("EBImage",force = T)
 library("EBImage")
-
+library("recolorize")
 #imager and tidyr are on CRAN
 library(imager)
 library(tidyr)
@@ -50,12 +50,18 @@ Mask_1  <-as.cimg(layers[[LayersToUse]])
 #blur image to connect blobs
 ExGreen <- isoblur(Mask_1, .2)
 
+ExGreen <- fillHull(ExGreen)
+
+
+
+
+
 #provide a label 
-ExGreen <- bwlabel(ExGreen)
+ExGreen_labled <- bwlabel(ExGreen)
 
 
 #create a data set to print alongside the data
-dots_bw <- getFrame(ExGreen, 1)
+dots_bw <- getFrame(ExGreen_labled, 1)
 labelled_dots <- bwlabel(dots_bw)
 df <- as.data.frame(cbind(computeFeatures.moment(labelled_dots),
                           computeFeatures.shape(labelled_dots)))
@@ -73,6 +79,27 @@ write.csv(LabeledDots, paste0("OutputTables/Labeled_LayerUsed_",LayersToUse,"_",
 
 
 ALL_LabeledDots<-rbind(ALL_LabeledDots,LabeledDots)
+
+
+
+
+
+# Determine position (center of mass) of each object in 'cmask'
+M <- computeFeatures.moment(labelled_dots) # list of length 4 returned
+xy <- M[,c("m.cx", "m.cy")]
+
+# Create labels and plot in 'raster' mode 
+labels <- as.character(1:nrow(xy))
+
+pdf(paste0("OutputImages/LabeledBlobs_LayerUsed_",LayersToUse,"_",InputImage[i],".pdf"))
+plot(ExGreen)
+
+# Add labels by text function
+text(xy, labels, col = "Red")
+
+dev.off()
+
+
 }
 
 #ignore errors
